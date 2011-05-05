@@ -1,0 +1,30 @@
+#!/usr/bin/python
+
+import os
+import dbus
+import dbus.service
+import dbus.mainloop.glib
+import gobject
+
+class Daemon(dbus.service.Object):
+    INTERFACE = "me.imtx.vpndaemon"
+
+    @dbus.service.method(INTERFACE,
+                         in_signature='s', out_signature='')
+    def load_config(self, path):
+        os.system('ln -sf %s /etc/openvpn/openvpn.conf' % path)
+
+    @dbus.service.method(INTERFACE,
+                         in_signature='', out_signature='')
+    def exit(self):
+        mainloop.quit()
+
+if __name__ == '__main__':
+    dbus.mainloop.glib.DBusGMainLoop(set_as_default=True)
+
+    system_bus = dbus.SystemBus()
+    name = dbus.service.BusName(Daemon.INTERFACE, system_bus)
+    object = Daemon(system_bus, '/Daemon')
+
+    mainloop = gobject.MainLoop()
+    mainloop.run()

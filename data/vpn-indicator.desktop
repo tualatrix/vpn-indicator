@@ -1,0 +1,10 @@
+[Desktop Entry]
+Encoding=UTF-8
+Version=1.0
+Type=Application
+Terminal=false
+Exec=vpn-indicator
+Name=VPN Indicator
+Comment=VPN Indicator for Ubuntu
+Icon=vpn-indicator
+Categories=Application;Network

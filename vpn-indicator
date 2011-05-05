@@ -1,0 +1,72 @@
+#!/usr/bin/python
+
+import os
+import glob
+
+import dbus
+import gobject
+import gtk
+import appindicator
+
+
+class VpnIndicator(appindicator.Indicator):
+    INTERFACE = "me.imtx.vpndaemon"
+
+    def __init__(self):
+        appindicator.Indicator.__init__(self,
+                                        "vpn-indicator",
+                                        "vpn-indicator-closed",
+                                        appindicator.CATEGORY_APPLICATION_STATUS)
+        self.set_status (appindicator.STATUS_ACTIVE)
+        self.set_attention_icon("indicator-messages-new")
+
+        self._init_daemon()
+        self._create_menu()
+
+    def _create_menu(self):
+        menu = gtk.Menu()
+
+        first_item = None
+        for f in glob.glob('/etc/openvpn/*.ovpn'):
+            menu_items = gtk.RadioMenuItem(first_item,
+                                           os.path.splitext(os.path.basename(f))[0])
+            
+            if first_item == None:
+                first_item = menu_items
+
+            if os.path.realpath('/etc/openvpn/openvpn.conf') == f:
+                menu_items.set_active(True)
+
+            menu.append(menu_items)
+
+            menu_items.connect("activate", self.on_vpnmenu_activated, f)
+
+        menu.append(gtk.SeparatorMenuItem())
+
+        log_menu = gtk.MenuItem('Status...')
+        log_menu.connect('activate', self.on_log_menu_activated)
+
+        menu.append(log_menu)
+        menu.append(gtk.MenuItem('Quit'))
+
+        menu.show_all()
+        self.set_menu(menu)
+
+    def on_log_menu_activated(self, widget):
+        print 'show log'
+
+    def on_vpnmenu_activated(self, widget, buf):
+        self.daemon.load_config(buf, dbus_interface='me.imtx.vpndaemon')
+#        self.daemon.connect_vpn(buf, dbus_interface='me.imtx.vpndaemon')
+
+    def _init_daemon(self):
+        try:
+            systembus = dbus.SystemBus()
+            self.daemon = systembus.get_object('me.imtx.vpndaemon', '/Daemon')
+        except Exception, e:
+            print e
+            self.daemon = None
+
+if __name__ == "__main__":
+    VpnIndicator()
+    gtk.main()

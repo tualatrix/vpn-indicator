@@ -1,0 +1,4 @@
+[D-BUS Service]
+Name=me.imtx.vpndaemon
+Exec=/usr/bin/vpn-indicator-daemon
+User=root

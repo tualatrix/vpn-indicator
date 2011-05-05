@@ -1,0 +1,3 @@
+include *.in README
+include data/*
+recursive-include data *.png *.in *.conf *.desktop *.service
