@@ -1,0 +1,21 @@
+Source: vpn-indicator
+Section: net
+Priority: optional
+Maintainer: Tualatrix Chou <tualatrix@gmail.com>
+Build-Depends: debhelper (>= 7.0.50~),
+ intltool,
+ python-central (>= 0.5.6),
+ python-dev,
+ python-setuptools,
+ python-distutils-extra
+Standards-Version: 3.9.1
+Homepage: http://imtx.me
+
+Package: vpn-indicator
+Architecture: any
+Depends: python-gtk2,
+ python-dbus,
+ python-appindicator,
+ ${python:Depends}
+Description: VPN Indicator for Ubuntu
+ Website:http://imtx.me
