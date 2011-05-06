@@ -9,6 +9,46 @@ import gtk
 import appindicator
 
 
+class GuiBuilder(object):
+    def __init__(self, path):
+        file_path = os.path.join(path)
+
+        self.builder = gtk.Builder()
+        self.builder.set_translation_domain('ubuntu-tweak')
+        self.builder.add_from_file(file_path)
+        self.builder.connect_signals(self)
+
+        for o in self.builder.get_objects():
+            if issubclass(type(o), gtk.Buildable):
+                name = gtk.Buildable.get_name(o)
+                setattr(self, name, o)
+            else:
+                print("WARNING: can not set name for non Buildable object: %s" % o)
+
+    def get_object(self, name):
+        return self.builder.get_object(name)
+
+
+class LogWindow(gtk.Window, GuiBuilder):
+    def __init__(self):
+        gtk.Window.__init__(self)
+        GuiBuilder.__init__(self, 'data/vpn-indicator.ui')
+
+        self.set_size_request(480, 320)
+        self.set_title('VPN Indicator')
+
+        self.hpaned1.reparent(self)
+
+        self._update_model()
+
+    def _update_model(self):
+        configs = glob.glob('/etc/openvpn/*.ovpn')
+        configs.sort()
+
+        for f in configs:
+            self.config_model.append((f, os.path.splitext(os.path.basename(f))[0]))
+
+
 class VpnIndicator(appindicator.Indicator):
     INTERFACE = "me.imtx.vpndaemon"
 
@@ -57,6 +97,8 @@ class VpnIndicator(appindicator.Indicator):
 
     def on_log_menu_activated(self, widget):
         print 'show log'
+        window = LogWindow()
+        window.show_all()
 
     def on_vpnmenu_activated(self, widget, buf):
         self.daemon.load_config(buf, dbus_interface='me.imtx.vpndaemon')
