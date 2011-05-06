@@ -27,7 +27,10 @@ class VpnIndicator(appindicator.Indicator):
         menu = gtk.Menu()
 
         first_item = None
-        for f in glob.glob('/etc/openvpn/*.ovpn'):
+        configs = glob.glob('/etc/openvpn/*.ovpn')
+        configs.sort()
+
+        for f in configs:
             menu_items = gtk.RadioMenuItem(first_item,
                                            os.path.splitext(os.path.basename(f))[0])
             
