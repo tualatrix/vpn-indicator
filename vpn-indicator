@@ -34,7 +34,8 @@ class LogWindow(gtk.Window, GuiBuilder):
         gtk.Window.__init__(self)
         GuiBuilder.__init__(self, 'data/vpn-indicator.ui')
 
-        self.set_size_request(480, 320)
+        self.set_position(gtk.WIN_POS_CENTER)
+        self.set_size_request(800, 600)
         self.set_title('VPN Indicator')
 
         self.hpaned1.reparent(self)
