@@ -57,7 +57,11 @@ class LogWindow(gtk.Window, GuiBuilder):
             # if it is the current config, select it
             if os.path.realpath('/etc/openvpn/openvpn.conf') == f:
                 self.config_view.get_selection().select_iter(iter)
+                self.show_log()
 
+    def show_log(self):
+        data = os.popen('cat /var/log/syslog|grep "openvpn"').read()
+        self.log_view.get_buffer().set_text(data)
 
 class VpnIndicator(appindicator.Indicator):
     INTERFACE = "me.imtx.vpndaemon"
