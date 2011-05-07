@@ -95,9 +95,11 @@ class VpnIndicator(appindicator.Indicator):
 
         log_menu = gtk.MenuItem('Status...')
         log_menu.connect('activate', self.on_log_menu_activated)
-
         menu.append(log_menu)
-        menu.append(gtk.MenuItem('Quit'))
+
+        quit_menu = gtk.MenuItem('Quit')
+        quit_menu.connect('activate', self.on_quit_menu_activated)
+        menu.append(quit_menu)
 
         menu.show_all()
         self.set_menu(menu)
@@ -106,6 +108,9 @@ class VpnIndicator(appindicator.Indicator):
         print 'show log'
         window = LogWindow()
         window.show_all()
+
+    def on_quit_menu_activated(self, widget):
+        gtk.main_quit()
 
     def on_vpnmenu_activated(self, widget, buf):
         self.daemon.load_config(buf, dbus_interface='me.imtx.vpndaemon')
