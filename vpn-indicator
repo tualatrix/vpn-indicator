@@ -41,6 +41,11 @@ class LogWindow(gtk.Window, GuiBuilder):
         self.hpaned1.reparent(self)
 
         self._update_model()
+        self.connect('delete-event', self.on_delete_event)
+
+    def on_delete_event(self, widget, event):
+        self.hide()
+        return True
 
     def _update_model(self):
         configs = glob.glob('/etc/openvpn/*.ovpn')
@@ -63,11 +68,13 @@ class VpnIndicator(appindicator.Indicator):
                                         "changes-allow-symbolic",
                                         appindicator.CATEGORY_APPLICATION_STATUS)
         self.set_status(appindicator.STATUS_ACTIVE)
-        self.set_attention_icon("indicator-messages-new")
+        self.set_attention_icon("indicatr-messages-new")
 
         self._init_daemon()
         self._create_menu()
         self._init_status()
+
+        self._window = None
 
     def _init_status(self):
         if 'is running' in os.popen('service openvpn status').read():
@@ -110,9 +117,11 @@ class VpnIndicator(appindicator.Indicator):
         self.set_menu(menu)
 
     def on_log_menu_activated(self, widget):
-        print 'show log'
-        window = LogWindow()
-        window.show_all()
+        if self._window:
+            self._window.present()
+        else:
+            self._window = LogWindow()
+            self._window.show_all()
 
     def on_quit_menu_activated(self, widget):
         gtk.main_quit()
