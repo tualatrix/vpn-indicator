@@ -55,13 +55,20 @@ class VpnIndicator(appindicator.Indicator):
     def __init__(self):
         appindicator.Indicator.__init__(self,
                                         "vpn-indicator",
-                                        "vpn-indicator-closed",
+                                        "changes-allow-symbolic",
                                         appindicator.CATEGORY_APPLICATION_STATUS)
-        self.set_status (appindicator.STATUS_ACTIVE)
+        self.set_status(appindicator.STATUS_ACTIVE)
         self.set_attention_icon("indicator-messages-new")
 
         self._init_daemon()
         self._create_menu()
+        self._init_status()
+
+    def _init_status(self):
+        if 'is running' in os.popen('service openvpn status').read():
+            self.set_icon('nm-vpn-standalone-lock')
+        else:
+            self.set_icon("changes-allow-symbolic")
 
     def _create_menu(self):
         menu = gtk.Menu()
