@@ -62,9 +62,16 @@ class LogWindow(gtk.Window, GuiBuilder):
     def show_log(self):
         data = os.popen('cat /var/log/syslog|grep "openvpn"').read()
         self.log_view.get_buffer().set_text(data)
+        #TODO scroll to end
+
 
 class VpnIndicator(appindicator.Indicator):
     INTERFACE = "me.imtx.vpndaemon"
+
+    _window = None
+    _current_config = None
+#    animate_seq = ['changes-allow-symbolic', 'nm-vpn-standalone-lock']
+    animate_seq = ['nm-signal-00-secure', 'nm-signal-25-secure', 'nm-signal-50-secure', 'nm-signal-75-secure', 'nm-signal-100-secure']
 
     def __init__(self):
         appindicator.Indicator.__init__(self,
@@ -76,15 +83,25 @@ class VpnIndicator(appindicator.Indicator):
 
         self._init_daemon()
         self._create_menu()
-        self._init_status()
 
-        self._window = None
+        gobject.timeout_add(1000, self.checkvpn_status)
 
-    def _init_status(self):
-        if 'is running' in os.popen('service openvpn status').read():
-            self.set_icon('nm-vpn-standalone-lock')
-        else:
+    def checkvpn_status(self):
+        if not self.is_vpn_connected() and self.is_vpn_runned():
+            animate_icon = self.animate_seq[0]
+            self.animate_seq.append(self.animate_seq.pop(0))
+            self.set_icon(animate_icon)
+        elif not self.is_vpn_connected() and not self.is_vpn_runned():
             self.set_icon("changes-allow-symbolic")
+        elif self.is_vpn_connected() and self.is_vpn_runned():
+            self.set_icon('nm-vpn-standalone-lock')
+        return True
+
+    def is_vpn_connected(self):
+        return 'tun' in os.popen('ifconfig -s').read()
+
+    def is_vpn_runned(self):
+        return 'is running' in os.popen('service openvpn status').read()
 
     def _create_menu(self):
         menu = gtk.Menu()
@@ -94,13 +111,15 @@ class VpnIndicator(appindicator.Indicator):
         configs.sort()
 
         for f in configs:
+            short_name = os.path.splitext(os.path.basename(f))[0]
             menu_items = gtk.RadioMenuItem(first_item,
-                                           os.path.splitext(os.path.basename(f))[0])
+                                           short_name)
             
             if first_item == None:
                 first_item = menu_items
 
             if os.path.realpath('/etc/openvpn/openvpn.conf') == f:
+                self._current_config = short_name
                 menu_items.set_active(True)
 
             menu.append(menu_items)
@@ -131,6 +150,15 @@ class VpnIndicator(appindicator.Indicator):
         gtk.main_quit()
 
     def on_vpnmenu_activated(self, widget, buf):
+        if self.is_vpn_connected() and widget.get_active():
+            short_name = os.path.splitext(os.path.basename(buf))[0]
+            dialog = gtk.MessageDialog(buttons=gtk.BUTTONS_YES_NO)
+            print self._current_config
+            dialog.set_markup('<b><big>VPN "%s" is connected</big></b>\n\nWould you like to turn off it, then connect to "%s"?' % (
+                              self._current_config, short_name))
+            dialog.run()
+            dialog.destroy()
+            return
         self.daemon.load_config(buf, dbus_interface='me.imtx.vpndaemon')
 #        self.daemon.connect_vpn(buf, dbus_interface='me.imtx.vpndaemon')
 
