@@ -16,6 +16,16 @@ class Daemon(dbus.service.Object):
 
     @dbus.service.method(INTERFACE,
                          in_signature='', out_signature='')
+    def stop_vpn(self):
+        os.system('service openvpn stop')
+
+    @dbus.service.method(INTERFACE,
+                         in_signature='', out_signature='')
+    def start_vpn(self):
+        os.system('service openvpn start')
+
+    @dbus.service.method(INTERFACE,
+                         in_signature='', out_signature='')
     def exit(self):
         mainloop.quit()
 

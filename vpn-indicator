@@ -2,6 +2,7 @@
 
 import os
 import glob
+import time
 
 import dbus
 import gobject
@@ -128,6 +129,16 @@ class VpnIndicator(appindicator.Indicator):
 
         menu.append(gtk.SeparatorMenuItem())
 
+        start_menu = gtk.MenuItem('Start')
+        start_menu.connect('activate', self.on_start_menu_activated)
+        menu.append(start_menu)
+
+        stop_menu = gtk.MenuItem('Stop')
+        stop_menu.connect('activate', self.on_stop_menu_activated)
+        menu.append(stop_menu)
+
+        menu.append(gtk.SeparatorMenuItem())
+
         log_menu = gtk.MenuItem('Status...')
         log_menu.connect('activate', self.on_log_menu_activated)
         menu.append(log_menu)
@@ -149,18 +160,38 @@ class VpnIndicator(appindicator.Indicator):
     def on_quit_menu_activated(self, widget):
         gtk.main_quit()
 
-    def on_vpnmenu_activated(self, widget, buf):
-        if self.is_vpn_connected() and widget.get_active():
-            short_name = os.path.splitext(os.path.basename(buf))[0]
-            dialog = gtk.MessageDialog(buttons=gtk.BUTTONS_YES_NO)
-            print self._current_config
-            dialog.set_markup('<b><big>VPN "%s" is connected</big></b>\n\nWould you like to turn off it, then connect to "%s"?' % (
-                              self._current_config, short_name))
-            dialog.run()
-            dialog.destroy()
-            return
-        self.daemon.load_config(buf, dbus_interface='me.imtx.vpndaemon')
-#        self.daemon.connect_vpn(buf, dbus_interface='me.imtx.vpndaemon')
+    def on_start_menu_activated(self, widget):
+        self.daemon.start_vpn(dbus_interface='me.imtx.vpndaemon')
+
+    def on_stop_menu_activated(self, widget):
+        self.daemon.stop_vpn(dbus_interface='me.imtx.vpndaemon')
+
+
+    def on_vpnmenu_activated(self, widget, config_path):
+        if widget.get_active():
+            short_name = os.path.splitext(os.path.basename(config_path))[0]
+
+            if self.is_vpn_connected():
+                dialog = gtk.MessageDialog(buttons=gtk.BUTTONS_YES_NO)
+                dialog.set_markup('<b><big>VPN "%s" is connected</big></b>\n\nWould you like to turn off it, then connect to "%s"?' % (
+                                  self._current_config, short_name))
+                response = dialog.run()
+                dialog.destroy()
+                if response ==  gtk.RESPONSE_YES:
+                    self.do_start_vpn(config_path)
+                return True
+            else:
+                self.do_start_vpn(config_path)
+
+    def do_start_vpn(self, config_path):
+        self.daemon.load_config(config_path, dbus_interface='me.imtx.vpndaemon')
+        self.daemon.stop_vpn(dbus_interface='me.imtx.vpndaemon')
+        while True:
+            if not self.is_vpn_runned():
+                self.daemon.start_vpn(dbus_interface='me.imtx.vpndaemon')
+                break
+            else:
+                time.sleep(1)
 
     def _init_daemon(self):
         try:
@@ -169,6 +200,7 @@ class VpnIndicator(appindicator.Indicator):
         except Exception, e:
             print e
             self.daemon = None
+
 
 if __name__ == "__main__":
     VpnIndicator()
