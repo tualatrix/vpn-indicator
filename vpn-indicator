@@ -46,7 +46,11 @@ class LogWindow(gtk.Window, GuiBuilder):
         configs.sort()
 
         for f in configs:
-            self.config_model.append((f, os.path.splitext(os.path.basename(f))[0]))
+            iter = self.config_model.append((f, os.path.splitext(os.path.basename(f))[0]))
+
+            # if it is the current config, select it
+            if os.path.realpath('/etc/openvpn/openvpn.conf') == f:
+                self.config_view.get_selection().select_iter(iter)
 
 
 class VpnIndicator(appindicator.Indicator):
