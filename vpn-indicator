@@ -65,8 +65,14 @@ class LogWindow(gtk.Window, GuiBuilder):
 
     def show_log(self):
         data = os.popen('cat /var/log/syslog|grep "openvpn"').read()
-        self.log_view.get_buffer().set_text(data)
-        #TODO scroll to end
+        text_buffer = self.log_view.get_buffer()
+        text_buffer.set_text(data)
+
+        iter_start, iter_end = text_buffer.get_bounds()
+
+        mark = text_buffer.create_mark(None, iter_end, False)
+        self.log_view.scroll_mark_onscreen(mark)
+        text_buffer.delete_mark(mark)
 
 
 class VpnIndicator(appindicator.Indicator):
