@@ -12,6 +12,7 @@ setup(name='vpn-indicator',
       data_files=[
           ('../etc/dbus-1/system.d/', ['data/vpn-indicator-daemon.conf']),
           ('../etc/xdg/autostart/', ['data/vpn-indicator.desktop']),
+          ('share/vpn-indicator/', glob.glob('data/*.ui')),
           ('share/dbus-1/system-services', ['data/me.imtx.vpndaemon.service']),
           ('share/applications', ['data/vpn-indicator.desktop']),
           ],
