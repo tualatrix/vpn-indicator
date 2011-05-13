@@ -12,10 +12,10 @@ Standards-Version: 3.9.1
 Homepage: http://imtx.me
 
 Package: vpn-indicator
-Architecture: any
+Architecture: all
 Depends: python-gtk2,
  python-dbus,
  python-appindicator,
  ${python:Depends}
 Description: VPN Indicator for Ubuntu
- Website:http://imtx.me
+ Website: http://imtx.me
