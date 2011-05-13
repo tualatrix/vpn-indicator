@@ -1,5 +1,5 @@
-vpn-indicator (1.0.0-1~natty1) natty; urgency=low
+vpn-indicator (1.0.0-2~natty1) natty; urgency=low
 
   * New upstream release
 
- -- Tualatrix Chou <tualatrix@gmail.com>  Thu, 05 May 2011 22:05:09 +0800
+ -- Tualatrix Chou <tualatrix@gmail.com>  Fri, 13 May 2011 21:07:06 +0800
