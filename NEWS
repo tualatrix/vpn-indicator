@@ -1,0 +1,6 @@
+vpn-indicator 1.0.1
+===================
+
+ * Overview of Changes:
+   - Show notify when the connection status changes
+   - Improve the do_start_vpn method, so start menu will call this too
