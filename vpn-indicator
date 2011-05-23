@@ -7,6 +7,7 @@ import time
 import dbus
 import gobject
 import gtk
+import pynotify
 import appindicator
 
 
@@ -78,8 +79,13 @@ class LogWindow(gtk.Window, GuiBuilder):
 class VpnIndicator(appindicator.Indicator):
     INTERFACE = "me.imtx.vpndaemon"
 
+    (STATUS_CONNECTING,
+     STATUS_CONNECTED,
+     STATUS_DISCONNECTED) = range(3)
+
     _window = None
     _current_config = None
+    _current_status = None
 #    animate_seq = ['changes-allow-symbolic', 'nm-vpn-standalone-lock']
     animate_seq = ['nm-signal-00-secure', 'nm-signal-25-secure', 'nm-signal-50-secure', 'nm-signal-75-secure', 'nm-signal-100-secure']
 
@@ -93,6 +99,7 @@ class VpnIndicator(appindicator.Indicator):
 
         self._init_daemon()
         self._create_menu()
+        self._current_status = self.STATUS_CONNECTING
 
         gobject.timeout_add(1000, self.checkvpn_status)
 
@@ -103,8 +110,14 @@ class VpnIndicator(appindicator.Indicator):
             self.set_icon(animate_icon)
         elif not self.is_vpn_connected() and not self.is_vpn_runned():
             self.set_icon("changes-allow-symbolic")
+            if self._current_status != self.STATUS_DISCONNECTED:
+                pynotify.Notification(self._current_config, 'VPN disconnected', 'vpn-indicator').show()
+            self._current_status = self.STATUS_DISCONNECTED
         elif self.is_vpn_connected() and self.is_vpn_runned():
+            if self._current_status != self.STATUS_CONNECTED:
+                pynotify.Notification(self._current_config, 'VPN Connection Established', 'vpn-indicator').show()
             self.set_icon('nm-vpn-standalone-lock')
+            self._current_status = self.STATUS_CONNECTED
         return True
 
     def is_vpn_connected(self):
@@ -212,5 +225,6 @@ class VpnIndicator(appindicator.Indicator):
 
 
 if __name__ == "__main__":
+    pynotify.init('vpn-indicator')
     VpnIndicator()
     gtk.main()
