@@ -183,11 +183,10 @@ class VpnIndicator(appindicator.Indicator):
         gtk.main_quit()
 
     def on_start_menu_activated(self, widget):
-        self.daemon.start_vpn(dbus_interface='me.imtx.vpndaemon')
+        self.do_start_vpn()
 
     def on_stop_menu_activated(self, widget):
         self.daemon.stop_vpn(dbus_interface='me.imtx.vpndaemon')
-
 
     def on_vpnmenu_activated(self, widget, config_path):
         if widget.get_active():
@@ -205,14 +204,18 @@ class VpnIndicator(appindicator.Indicator):
             else:
                 self.do_start_vpn(config_path)
 
-    def do_start_vpn(self, config_path):
-        self.daemon.load_config(config_path, dbus_interface='me.imtx.vpndaemon')
+    def do_start_vpn(self, config_path=None):
+        if config_path:
+            print 'load config: %s' % config_path
+            self.daemon.load_config(config_path, dbus_interface='me.imtx.vpndaemon')
         self.daemon.stop_vpn(dbus_interface='me.imtx.vpndaemon')
         while True:
             if not self.is_vpn_runned():
+                print 'do_start_vpn'
                 self.daemon.start_vpn(dbus_interface='me.imtx.vpndaemon')
                 break
             else:
+                print 'vpn is running, check status'
                 time.sleep(1)
 
     def _init_daemon(self):
