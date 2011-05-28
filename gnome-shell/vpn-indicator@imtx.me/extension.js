@@ -43,6 +43,12 @@ VpnIndicator.prototype = {
         let dir = Gio.file_new_for_path("/etc/openvpn/");
         fileEnum = dir.enumerate_children('standard::*', Gio.FileQueryInfoFlags.NONE, null);
 
+        let vpnConfig = Gio.file_new_for_path("/etc/openvpn/openvpn.conf");
+        let fileType = vpnConfig.query_info('standard::*', Gio.FileQueryInfoFlags.NONE, null);
+
+        let target = fileType.get_symlink_target();
+        global.log("The vpn config real path is: " + target);
+
         while ((info = fileEnum.next_file(null)) != null) {
             let fileType = info.get_file_type();
             let name = info.get_name();
@@ -52,6 +58,10 @@ VpnIndicator.prototype = {
                 item = new PopupMenu.PopupMenuItem(match[1]);
                 item.connect('activate', Lang.bind(this, this._onVpnMenuActivate, name));
                 this.menu.addMenuItem(item);
+
+                if (name == target) {
+                    item.setShowDot(true);
+                }
             }
         }
     },
