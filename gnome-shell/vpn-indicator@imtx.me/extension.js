@@ -4,6 +4,8 @@ const PopupMenu = imports.ui.popupMenu;
 const PanelMenu = imports.ui.panelMenu;
 const Shell = imports.gi.Shell;
 const Lang = imports.lang;
+const GLib = imports.gi.GLib;
+const Gio = imports.gi.Gio;
 
 const Gettext = imports.gettext;
 const _ = Gettext.gettext;
@@ -23,8 +25,38 @@ VpnIndicator.prototype = {
                                    icon_size: Main.panel.button.height });
         this.actor.set_child(this._icon);
 
+        item = new PopupMenu.PopupSeparatorMenuItem();
+        this._vpnSwitch = new PopupMenu.PopupSwitchMenuItem(_("OpenVPN"), false);
+        this.menu.addMenuItem(this._vpnSwitch);
+
+        item = new PopupMenu.PopupSeparatorMenuItem();
+        this.menu.addMenuItem(item);
+
+        this._createSubMenu();
+
         Main.panel._rightBox.insert_actor(this.actor, 1);
         Main.panel._menus.addMenu(this.menu);
+    },
+
+    _createSubMenu: function() {
+        let item;
+        let dir = Gio.file_new_for_path("/etc/openvpn/");
+        fileEnum = dir.enumerate_children('standard::*', Gio.FileQueryInfoFlags.NONE, null);
+
+        while ((info = fileEnum.next_file(null)) != null) {
+            let fileType = info.get_file_type();
+            let name = info.get_name();
+
+            match = name.match(/([\w\d-]+)(.ovpn$)/);
+            if (match != null) {
+                item = new PopupMenu.PopupMenuItem(match[1]);
+                item.connect('activate', Lang.bind(this, this._onVpnMenuActivate, name));
+                this.menu.addMenuItem(item);
+            }
+        }
+    },
+
+    _onVpnMenuActivate: function(item, event, name) {
     },
 };
 
