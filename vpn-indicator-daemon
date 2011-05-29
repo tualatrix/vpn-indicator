@@ -5,9 +5,11 @@ import dbus
 import dbus.service
 import dbus.mainloop.glib
 import gobject
+import subprocess
 
 class Daemon(dbus.service.Object):
     INTERFACE = "me.imtx.vpndaemon"
+    ENV = {'PATH': '/usr/local/bin:/usr/bin:/bin:/usr/local/sbin:/usr/sbin:/sbin'}
 
     @dbus.service.method(INTERFACE,
                          in_signature='s', out_signature='')
@@ -15,14 +17,46 @@ class Daemon(dbus.service.Object):
         os.system('ln -sf %s /etc/openvpn/openvpn.conf' % path)
 
     @dbus.service.method(INTERFACE,
-                         in_signature='', out_signature='')
+                         in_signature='', out_signature='ss')
     def stop_vpn(self):
-        os.system('service openvpn stop')
+        return subprocess.Popen(['service', 'openvpn', 'stop'],
+                                stdout=subprocess.PIPE,
+                                stderr=subprocess.PIPE,
+                                env=self.ENV).communicate()
 
     @dbus.service.method(INTERFACE,
-                         in_signature='', out_signature='')
+                         in_signature='', out_signature='ss')
     def start_vpn(self):
-        os.system('service openvpn start')
+        return subprocess.Popen(['service', 'openvpn', 'start'],
+                                stdout=subprocess.PIPE,
+                                stderr=subprocess.PIPE,
+                                env=self.ENV).communicate()
+
+    @dbus.service.method(INTERFACE,
+                         in_signature='', out_signature='b')
+    def is_running(self):
+        # Fedora/GNOME Shell use this
+        output = ''.join(subprocess.Popen(['service', 'openvpn', 'status'],
+                                        stdout=subprocess.PIPE,
+                                        stderr=subprocess.PIPE,
+                                        env=self.ENV).communicate())
+        if 'not started' in output:
+            return False
+        else:
+            return True
+
+    @dbus.service.method(INTERFACE,
+                         in_signature='', out_signature='b')
+    def is_connected(self):
+        # Fedora/GNOME Shell use this
+        output = ''.join(subprocess.Popen(['ifconfig', '-s'],
+                                          stdout=subprocess.PIPE,
+                                          stderr=subprocess.PIPE,
+                                          env=self.ENV).communicate())
+        if 'tun' in output:
+            return True
+        else:
+            return False
 
     @dbus.service.method(INTERFACE,
                          in_signature='', out_signature='')
