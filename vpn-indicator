@@ -104,20 +104,21 @@ class VpnIndicator(appindicator.Indicator):
         gobject.timeout_add(1000, self.checkvpn_status)
 
     def checkvpn_status(self):
-        if not self.is_vpn_connected() and self.is_vpn_runned():
-            animate_icon = self.animate_seq[0]
-            self.animate_seq.append(self.animate_seq.pop(0))
-            self.set_icon(animate_icon)
-        elif not self.is_vpn_connected() and not self.is_vpn_runned():
-            self.set_icon("changes-allow-symbolic")
-            if self._current_status != self.STATUS_DISCONNECTED:
-                pynotify.Notification(self._current_config, 'VPN disconnected', 'vpn-indicator').show()
-            self._current_status = self.STATUS_DISCONNECTED
-        elif self.is_vpn_connected() and self.is_vpn_runned():
-            if self._current_status != self.STATUS_CONNECTED:
-                pynotify.Notification(self._current_config, 'VPN Connection Established', 'vpn-indicator').show()
-            self.set_icon('nm-vpn-standalone-lock')
-            self._current_status = self.STATUS_CONNECTED
+        if self._current_config:
+            if not self.is_vpn_connected() and self.is_vpn_runned():
+                animate_icon = self.animate_seq[0]
+                self.animate_seq.append(self.animate_seq.pop(0))
+                self.set_icon(animate_icon)
+            elif not self.is_vpn_connected() and not self.is_vpn_runned():
+                self.set_icon("changes-allow-symbolic")
+                if self._current_status != self.STATUS_DISCONNECTED:
+                    pynotify.Notification(self._current_config, 'VPN disconnected', 'vpn-indicator').show()
+                self._current_status = self.STATUS_DISCONNECTED
+            elif self.is_vpn_connected() and self.is_vpn_runned():
+                if self._current_status != self.STATUS_CONNECTED:
+                    pynotify.Notification(self._current_config, 'VPN Connection Established', 'vpn-indicator').show()
+                self.set_icon('nm-vpn-standalone-lock')
+                self._current_status = self.STATUS_CONNECTED
         return True
 
     def is_vpn_connected(self):
