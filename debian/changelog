@@ -1,3 +1,9 @@
+vpn-indicator (1.0.2-1~natty1) natty; urgency=low
+
+  * Only show notify when the current_config is exist
+
+ -- Tualatrix Chou <tualatrix@gmail.com>  Mon, 06 Jun 2011 19:33:14 +0800
+
 vpn-indicator (1.0.1-1~natty1) natty; urgency=low
 
   * Overview of Changes:
