@@ -2,7 +2,7 @@ import glob
 from setuptools import setup, find_packages
 
 setup(name='vpn-indicator',
-      version='1.0.2',
+      version='1.0.3',
       description='VPN Indicator for Ubuntu',
       author='Tualatrix Chou',  
       author_email='tualatrix@gmail.com',

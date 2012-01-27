@@ -192,6 +192,7 @@ class VpnIndicator(appindicator.Indicator):
     def on_vpnmenu_activated(self, widget, config_path):
         if widget.get_active():
             short_name = os.path.splitext(os.path.basename(config_path))[0]
+            self._current_config = short_name
 
             if self.is_vpn_connected():
                 dialog = gtk.MessageDialog(buttons=gtk.BUTTONS_YES_NO)
