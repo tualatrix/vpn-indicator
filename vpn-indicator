@@ -152,17 +152,17 @@ class VpnIndicator(appindicator.Indicator):
 
         menu.append(gtk.SeparatorMenuItem())
 
-        start_menu = gtk.MenuItem('Start')
+        start_menu = gtk.MenuItem('Start VPN')
         start_menu.connect('activate', self.on_start_menu_activated)
         menu.append(start_menu)
 
-        stop_menu = gtk.MenuItem('Stop')
+        stop_menu = gtk.MenuItem('Stop VPN')
         stop_menu.connect('activate', self.on_stop_menu_activated)
         menu.append(stop_menu)
 
         menu.append(gtk.SeparatorMenuItem())
 
-        log_menu = gtk.MenuItem('Status...')
+        log_menu = gtk.MenuItem('VPN Status...')
         log_menu.connect('activate', self.on_log_menu_activated)
         menu.append(log_menu)
 
